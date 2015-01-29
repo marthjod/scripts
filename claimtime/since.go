@@ -12,36 +12,47 @@ import (
 func main() {
 
 	var (
-		sinceUTC   string
+		since      string
 		now        time.Time
+		start      time.Time
+		location   *time.Location
 		todayStamp []string
 		err        error
 	)
 
-	flag.StringVar(&sinceUTC, "since-utc", "", "Start time (delta = now - start)")
+	flag.StringVar(&since, "since", "", "Start time (delta := now - start)")
 	flag.Parse()
 
-	if len(sinceUTC) == 0 {
-		fmt.Println("Need start time as argument")
+	if len(since) == 0 {
+		flag.Usage()
 		os.Exit(1)
 	}
 
-	now = time.Now().UTC()
-	fmt.Printf("Now: %v\n", now)
+	location, err = time.LoadLocation("Local")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(2)
+	} else {
+		fmt.Printf("Location: %v\n", location)
+	}
+
+	now = time.Now().Local()
+	fmt.Printf("Now:\t%v\n", now)
 
 	todayStamp = []string{
 		now.Weekday().String()[:3],
 		now.Month().String()[:3],
 		strconv.Itoa(now.Day()),
-		sinceUTC,
+		since,
 		strconv.Itoa(now.Year()),
 	}
 
-	start, err := time.Parse(time.ANSIC, strings.Join(todayStamp, " "))
+	start, err = time.ParseInLocation(time.ANSIC, strings.Join(todayStamp, " "), location)
 	if err != nil {
-		fmt.Printf("%v\n", err.Error())
+		fmt.Println(err.Error())
+		os.Exit(2)
 	} else {
-		start = start.UTC()
-		fmt.Printf("Delta: %v\n", time.Since(start))
+		fmt.Printf("Start:\t%v\n", start)
+		fmt.Printf("Delta:\t%v\n", time.Since(start))
 	}
 }
