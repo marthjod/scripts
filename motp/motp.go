@@ -27,7 +27,7 @@ func main() {
 		nowStr      string
 	)
 
-	currentUser, err = user.Current()
+	currentUser, _ = user.Current()
 
 	flag.StringVar(&vpnUser, "u", currentUser.Name, "OpenVPN user")
 	flag.StringVar(&outFile, "o", "", "Output file path")
